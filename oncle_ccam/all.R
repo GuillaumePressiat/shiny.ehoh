@@ -22,11 +22,11 @@ prep <- function(an) {
   pg = dbDriver("PostgreSQL")
   
   con = dbConnect(pg, 
-                  user="shinydim",
-                  host = '164.1.196.52', 
+                  user="-----",
+                  #host = '------', 
                   #host = 'localhost', 
-                  port = 5432,
-                  password="gui", dbname="basetest")
+                  port = -,
+                  password="----", dbname="-----")
   
   
   h <- tbl(con, 'ccam_hierarchie_actes') %>% filter(type == 'H') %>% select(-type) %>% collect()
