@@ -6,7 +6,7 @@ library(shinythemes)
 shinyUI(
   fluidPage(
     theme = shinytheme("lumen"),
-    navbarPage(title = "DiMonade",
+    navbarPage(title = "DiMonade",selected = "Oncle CCAM",
                tabPanel("Guide d'utilisation / Année",
                         column(8, 
                                h2("Guide d'utilisation"),
