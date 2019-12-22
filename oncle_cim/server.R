@@ -18,11 +18,13 @@ read_rds('cim15.Rds') -> cim15
 read_rds('cim16.Rds') -> cim16
 read_rds('cim17.Rds') -> cim17
 read_rds('cim18.Rds') -> cim18
+read_rds('cim19.Rds') -> cim19
 
 read_rds('listes15.Rds') -> listes15
 read_rds('listes16.Rds') -> listes16
 read_rds('listes17.Rds') -> listes17
 read_rds('listes18.Rds') -> listes18
+read_rds('listes19.Rds') -> listes19
 
 shinyServer(function(input, output){
   #zeroclipboard_setup()
@@ -47,7 +49,9 @@ shinyServer(function(input, output){
     })
   })
   output$df <- DT::renderDataTable(get(paste0('cim',input$an)) %>% 
-                                              select(Code = code, `Type de restriction` = tr,
+                                              select(Code = code, `Type de restriction MCO/HAD` = tr,
+                                                     # `Type SSR` = tssr,
+                                                     # `Type Psy` = tpsy,
                                                      `Libellé` = lib_long),
                                    filter = 'top',
                                    options = list(searchHighlight = TRUE,pageLength = 20),

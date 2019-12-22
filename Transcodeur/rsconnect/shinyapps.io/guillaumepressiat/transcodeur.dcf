@@ -1,8 +1,12 @@
 name: transcodeur
 title:
+username:
 account: guillaumepressiat
 server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
 appId: 170173
-bundleId: 779296
+bundleId: 1867173
 url: https://guillaumepressiat.shinyapps.io/transcodeur/
-when: 1491486532.07072
+when: 1549813681.39799
+asMultiple: FALSE
+asStatic: FALSE

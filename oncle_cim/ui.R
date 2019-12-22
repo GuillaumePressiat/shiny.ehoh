@@ -18,8 +18,8 @@ shinyUI(
       tabPanel("Version de groupage",
                fluidRow(
                  column(10,selectInput("an", label = h3("Choisir la version"), 
-                                       choices = list("2018" = 18, "2017" = 17,"2016" = 16, "2015" = 15), 
-                                       selected = 18)))),
+                                       choices = list("2019" = 19,  "2018" = 18, "2017" = 17,"2016" = 16, "2015" = 15), 
+                                       selected = 19)))),
       #h6("Cliquer", a("ici", href="http://164.1.196.52:3838"), "pour un retour à la page d'accueil de la plateforme"),
       mainPanel(width = 12,
                 tabsetPanel(
@@ -29,7 +29,11 @@ shinyUI(
       
       tabPanel("CIM-10",
                fluidRow(
-                 column(12, DT::dataTableOutput('df')))),
+                 
+                 column(12, 
+                        
+                        h6(strong("Types de restriction :"), "0 Pas de restriction - 1 Interdit en DP et en DR, autorisé ailleurs - 2 Interdit en DP et en DR, cause externe de morbidité - 3 interdit en DP, DR, DA - 4 Interdit en DP, autorisé ailleurs"),
+                        DT::dataTableOutput('df')))),
       
       tabPanel("Listes manuel GHM",
                fluidRow(

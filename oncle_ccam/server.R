@@ -6,21 +6,25 @@ library(DT)
 library(readr)
 #library(rclipboard)
 library(zeroclipr)
+library(rmarkdown)
 
 read_rds('ccam15.Rds') -> ccam15
 read_rds('ccam16.Rds') -> ccam16
 read_rds('ccam17.Rds') -> ccam17
 read_rds('ccam18.Rds') -> ccam18
+read_rds('ccam19.Rds') -> ccam19
 
 read_rds('hierarchie15.Rds') -> hierarchie15
 read_rds('hierarchie16.Rds') -> hierarchie16
 read_rds('hierarchie17.Rds') -> hierarchie17
 read_rds('hierarchie18.Rds') -> hierarchie18
+read_rds('hierarchie19.Rds') -> hierarchie19
 
 read_rds('listes15.Rds') -> listes15
 read_rds('listes16.Rds') -> listes16
 read_rds('listes17.Rds') -> listes17
 read_rds('listes18.Rds') -> listes18
+read_rds('listes19.Rds') -> listes19
 
 shinyServer(function(input, output){
 
@@ -32,20 +36,31 @@ shinyServer(function(input, output){
 
  # voir la table
   output$df2 <- DT::renderDataTable(distinct(get(paste0('ccam',input$an)) %>% 
-                                      select(`Code CCAM` = code,
-                                             `Code hiérarchie` = parent,
-                                             `Libellé` = libelle)),
+                                      select(`Code CCAM / ATIH` = code,
+                                             #`Code hiérarchie` = parent,
+                                             `Strate CCAM` = strate,
+                                             `Libellé` = libelle,
+                                             `Date de début` = date_debut,
+                                             `Date de fin` = date_fin)),
                                    filter = 'top',
-                                   options = list(pageLength = 20),
+                                   options = list(pageLength = 20,
+                                                  search = list(regex = TRUE)),
                                    rownames = FALSE, server = TRUE)
   
   output$df1 <- DT::renderDataTable(get(paste0('hierarchie',input$an)) %>% 
-                                      select(`Code hiérarchie` = parent,
+                                      select(`Niveau hiérarchique` = niveau,
+                                             #`Code hiérarchie` = code,
+                                             `Strate CCAM` = strate,
                                              `Libellé` = libelle,
-                                             `Libellé Niveau 1` = libelle_niveau_1,
-                                             `Libellé Niveau 2` = libelle_niveau_2,
-                                             `Libellé Niveau 3` = libelle_niveau_3,
-                                             `Libellé Niveau 4` = libelle_niveau_4),
+                                             `Chapitre` = libelle_niveau_1,
+                                             `Sous-chapitre` = libelle_niveau_2,
+                                             `Paragraphe` = libelle_niveau_3,
+                                             `Sous-paragraphe` = libelle_niveau_4) %>% 
+                                      mutate(`Niveau hiérarchique` = as.factor(case_when(
+                                        `Niveau hiérarchique` == 1 ~ '1 - Chapitre',
+                                        `Niveau hiérarchique` == 2 ~ '2 - Sous-chapitre',
+                                        `Niveau hiérarchique` == 3 ~ '3 - Paragraphe',
+                                        `Niveau hiérarchique` == 4 ~ '4 - Sous-paragraphe'))),
                                    filter = 'top',
                                    options = list(pageLength = 20),
                                    rownames = FALSE, server = TRUE)
@@ -101,8 +116,8 @@ shinyServer(function(input, output){
 # })
   clistetlib <- reactive({
     get(paste0('listes',input$an)) %>% filter(num_liste == input$num) %>%
-      distinct(acte,  libelle, d, rghm, cmd) %>% 
-      select(acte,  libelle, nom_liste = d, rghm, cmd)
+      distinct(acte,  acte_descr, libelle, d, rghm, cmd, date_debut, date_fin) %>% 
+      select(`Acte CCAM` = acte, `Acte ATIH` = acte_descr, libelle, nom_liste = d, rghm, cmd, date_debut, date_fin)
   })
   
   output$dflib <- DT::renderDataTable(datatable(
@@ -115,7 +130,9 @@ shinyServer(function(input, output){
   
   appartient <- reactive({
     get(paste0('listes',input$an)) %>% filter(acte == input$listi) %>% 
-      distinct(num_liste, .keep_all = T) %>% select(Acte = acte, `Nom de la liste`= d, `N° liste` = num_liste, `CM (D)` = cmd, `Racines ghm` = rghm)
+      distinct(num_liste, .keep_all = T) %>% select(Acte = acte, 
+                                                    `Acte ATIH` = acte_descr,
+                                                    `Nom de la liste`= d, `N° liste` = num_liste, `CM (D)` = cmd, `Racines ghm` = rghm)
   })
   
   output$datappartient <- DT::renderDataTable(datatable(appartient(), options = list(

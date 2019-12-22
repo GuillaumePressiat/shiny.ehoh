@@ -20,8 +20,8 @@ shinyUI(
       tabPanel("Version de groupage",
                fluidRow(
                  column(10,selectInput("an", label = h3("Choisir la version"), 
-                                       choices = list("2018" = 18, "2017" = 17,"2016" = 16, "2015" = 15), 
-                                       selected = 18)))),
+                                       choices = list("2019" = 19,  "2018" = 18, "2017" = 17,"2016" = 16, "2015" = 15), 
+                                       selected = 19)))),
       
 #h6("Cliquer", a("ici", href="http://164.1.196.52:3838"), "pour un retour à la page d'accueil de la plateforme"),
       mainPanel(width = 12,
