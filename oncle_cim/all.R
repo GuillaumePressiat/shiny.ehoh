@@ -5,20 +5,20 @@
 # require(readr)
 # library(dplyr, warn.conflicts = FALSE)
 # prep <- function(an) {
-#   
-#   
-#   
+# 
+# 
+# 
 #   # a <- readr::read_delim(paste0("../listes_fg/diags/lib_cim10/20",an,"/LIBCIM10.TXT"),skip=0, delim="|", col_names = c('code','tr','lib_court','lib_long'),
-#   #                        col_types = cols(code = 'c', tr = 'c', lib_court='c', lib_long='c'), 
+#   #                        col_types = cols(code = 'c', tr = 'c', lib_court='c', lib_long='c'),
 #   #                        locale = locale(encoding = 'latin1'))
-#   # 
+#   #
 #   con <- DBI::dbConnect(RSQLite::SQLite(), "~/Documents/R/PG/pg.sqlite")
-#   
+# 
 #   s <- as.character(2000 + an)
-#   a <- tbl(con, 'cim') %>% filter(time_i == local(seqta)) %>% collect()
-#     
+#   a <- tbl(con, 'cim') %>% filter(time_i == local(s)) %>% collect()
+# 
 #   write_rds(a,paste0('cim',an,'.Rds'))
-#   
+# 
 # 
 #   write_rds(read_csv2(paste0("../listes_fg/listes_manuel_20",an,'_ghm_vol_2.csv'), col_types = cols(
 #     liste = col_character(),
@@ -30,9 +30,9 @@
 #   )) %>% filter(var == "diags") %>% #, locale = locale(encoding = "latin1")
 #     mutate(num_liste = substr(liste, 3,nchar(liste)),
 #            e = libelle,
-#            diag = code, cmd = stringr::str_extract(cmd, '[0-9]{2}')) %>% 
-#     
-#     group_by(diag, liste, e, num_liste, libelle, cmd) %>% 
+#            diag = code, cmd = stringr::str_extract(cmd, '[0-9]{2}')) %>%
+# 
+#     group_by(diag, liste, e, num_liste, libelle, cmd) %>%
 #     summarise(rghm = paste0(rghm, collapse = ", ")) %>% ungroup() %>% arrange(num_liste),
 #             paste0('listes',an,'.Rds'))
 # }
