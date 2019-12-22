@@ -30,10 +30,10 @@
 #   #
 #   con <- DBI::dbConnect(RSQLite::SQLite(), "~/Documents/R/PG/pg.sqlite")
 # 
-#   h <- tbl(con, 'ccam_hierarchie_actes') %>% filter(type == 'H') %>% select(-type) %>% collect() %>% 
-#     mutate_at(vars(starts_with('niveau_')), stringr::str_pad, width = 2, side = "left", pad = "0") %>% 
+#   h <- tbl(con, 'ccam_hierarchie_actes') %>% filter(type == 'H') %>% select(-type) %>% collect() %>%
+#     mutate_at(vars(starts_with('niveau_')), stringr::str_pad, width = 2, side = "left", pad = "0") %>%
 #     tidyr::unite(strate, niveau_1,niveau_2,niveau_3,niveau_4, sep = ".")
-#   
+# 
 #   a <- tbl(con, 'ccam_actes_avec_descri') %>%
 #     select(code, libelle_long, extension_descriptive, flag_descri, date_debut, date_fin) %>%
 #     inner_join(tbl(con, 'ccam_hierarchie_actes') %>% filter(type == 'A') %>% select(code, parent)) %>%
@@ -45,9 +45,14 @@
 #     select(code, parent, libelle = libelle_long, date_debut, date_fin) %>%
 #     left_join(h %>% select(code, strate), by = c('parent' = 'code'))
 # 
+#   n <- tbl(con, 'ccam_notes') %>%
+#     arrange(code, type_note) %>% 
+#     collect()
+#   
 #   write_rds(a,paste0('ccam',an,'.Rds'))
 #   write_rds(h,paste0('hierarchie',an,'.Rds'))
-# 
+#   write_rds(n,paste0('notes',an,'.Rds'))
+#   
 #   write_rds(read_csv2(paste0("../listes_fg/listes_manuel_20",an,'_ghm_vol_2.csv'), col_types = cols(
 #     liste = col_character(),
 #     code = col_character(),
@@ -70,4 +75,4 @@
 # prep(17)
 # prep(18)
 # prep(19)
-
+# 

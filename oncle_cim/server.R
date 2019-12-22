@@ -54,7 +54,7 @@ shinyServer(function(input, output){
                                                      # `Type Psy` = tpsy,
                                                      `Libellé` = lib_long),
                                    filter = 'top',
-                                   options = list(searchHighlight = TRUE,pageLength = 20),
+                                   options = list(searchHighlight = TRUE, regex = TRUE, pageLength = 20),
                                    rownames = FALSE, server = TRUE)
   
   output$liste <- DT::renderDataTable(distinct(select(get(paste0('listes',input$an)), `N° de la liste` = num_liste, 
@@ -63,7 +63,7 @@ shinyServer(function(input, output){
                                                       CMD = cmd)), server = TRUE,
                                       filter = 'top',
                                       rownames = FALSE,
-                                      options = list(searchHighlight = TRUE,pageLength = 20))
+                                      options = list(searchHighlight = TRUE, pageLength = 20))
   
   clistet <- reactive({
     if (!grepl('CMD', input$num)){

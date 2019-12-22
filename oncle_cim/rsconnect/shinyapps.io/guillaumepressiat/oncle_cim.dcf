@@ -5,6 +5,6 @@ account: guillaumepressiat
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 314315
-bundleId: 2678461
+bundleId: 2686497
 url: https://guillaumepressiat.shinyapps.io/oncle_cim/
-when: 1576681038.70849
+when: 1577026247.76271

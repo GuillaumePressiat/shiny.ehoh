@@ -5,6 +5,6 @@ account: guillaumepressiat
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 314341
-bundleId: 2686294
+bundleId: 2686503
 url: https://guillaumepressiat.shinyapps.io/oncle_ccam/
-when: 1577014042.9748
+when: 1577026503.12538

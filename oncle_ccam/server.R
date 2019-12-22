@@ -14,6 +14,12 @@ read_rds('ccam17.Rds') -> ccam17
 read_rds('ccam18.Rds') -> ccam18
 read_rds('ccam19.Rds') -> ccam19
 
+read_rds('notes15.Rds') -> notes15
+read_rds('notes16.Rds') -> notes16
+read_rds('notes17.Rds') -> notes17
+read_rds('notes18.Rds') -> notes18
+read_rds('notes19.Rds') -> notes19
+
 read_rds('hierarchie15.Rds') -> hierarchie15
 read_rds('hierarchie16.Rds') -> hierarchie16
 read_rds('hierarchie17.Rds') -> hierarchie17
@@ -25,6 +31,11 @@ read_rds('listes16.Rds') -> listes16
 read_rds('listes17.Rds') -> listes17
 read_rds('listes18.Rds') -> listes18
 read_rds('listes19.Rds') -> listes19
+
+readr::read_rds('topographie.Rds') %>%  dplyr::select( Code = Code2, `Code Site Ana.` = Code, dplyr::everything()) ->topographie
+readr::read_rds('action.Rds') -> action
+readr::read_rds('technique.Rds') -> technique
+
 
 shinyServer(function(input, output){
 
@@ -44,6 +55,7 @@ shinyServer(function(input, output){
                                              `Date de fin` = date_fin)),
                                    filter = 'top',
                                    options = list(pageLength = 20,
+                                                  searchHighlight = TRUE, 
                                                   search = list(regex = TRUE)),
                                    rownames = FALSE, server = TRUE)
   
@@ -62,9 +74,20 @@ shinyServer(function(input, output){
                                         `Niveau hiérarchique` == 3 ~ '3 - Paragraphe',
                                         `Niveau hiérarchique` == 4 ~ '4 - Sous-paragraphe'))),
                                    filter = 'top',
-                                   options = list(pageLength = 20),
+                                   options = list(searchHighlight = TRUE, pageLength = 20),
                                    rownames = FALSE, server = TRUE)
   
+  output$df3 <- DT::renderDataTable(distinct(get(paste0('notes',input$an)) %>% 
+                                               tidyr::unite(`Type note`, type_note, libelle_type_note, sep = " - ") %>% 
+                                               select(`Code CCAM` = code,
+                                                      `Type note`,
+                                                      Note = note,
+                                                      `Date de début` = date_debut)),
+                                    filter = 'top',
+                                    options = list(pageLength = 20,
+                                                   searchHighlight = TRUE, 
+                                                   search = list(regex = TRUE)),
+                                    rownames = FALSE, server = TRUE)
   # Voir les listes
   output$listes <- DT::renderDataTable(distinct(select(get(paste0('listes',input$an)),`N° de liste` = num_liste, 
                                                        `Nom de la liste` = d, `Racines ghm` = rghm, `CM (D)` = cmd )), 
@@ -72,6 +95,7 @@ shinyServer(function(input, output){
                                       filter = 'top',
                                       rownames = FALSE,
                                       options = list(
+                                        searchHighlight = TRUE, 
                                           pageLength = 20,
                                         autoWidth = F))
   
@@ -147,6 +171,59 @@ shinyServer(function(input, output){
    zeroclipButton("clipbtn", "Copie Liste", te, icon("clipboard"))
  })
 
+ 
+ 
+ 
+ acte_topo1 <-   reactive({
+   unique(topographie[topographie$Code == substr(toupper(input$code),1,2),])
+ })
+ 
+ 
+ output$acte_topo <-   DT::renderDataTable(DT::datatable(acte_topo1(), rownames = FALSE, extensions = 'Scroller', options = list(scrollY = 40,
+                                                                                                               scroller = TRUE,  dom = 't',
+                                                                                                               autoWidth = TRUE,
+                                                                                                               columnDefs = list(list(width = '50px', targets = c(1))))) %>% 
+                                             DT::formatStyle('Code', backgroundColor = 'grey', color = 'white'))
+ 
+ 
+ acte_acti1 <-   reactive({
+   unique(action[action$Code == substr(toupper(input$code),3,3),])
+ })
+ 
+ 
+ output$acte_acti <-   DT::renderDataTable(DT::datatable(acte_acti1(), rownames = FALSE, extensions = 'Scroller', options = list(scrollY = 160,
+                                                                                                               scroller = TRUE,  dom = 't',
+                                                                                                               autoWidth = TRUE,
+                                                                                                               columnDefs = list(list(width = '50px', targets = c(1))))) %>% 
+                                             DT::formatStyle('Code', backgroundColor = 'grey', color = 'white'))
+ 
+ acte_techn1 <-   reactive({
+   unique(technique[technique$Code == substr(toupper(input$code),4,4),])
+ })
+ 
+ 
+ output$acte_techn <-   DT::renderDataTable(DT::datatable(acte_techn1(), rownames = FALSE, extensions = 'Scroller', options = list(scrollY = 160,
+                                                                                                                 scroller = TRUE,  dom = 't',
+                                                                                                                 autoWidth = TRUE,
+                                                                                                                 columnDefs = list(list(width = '50px', targets = c(1))))) %>% 
+                                              DT::formatStyle('Code', backgroundColor = 'grey', color = 'white'))
+ 
+ 
+ output$topographie <- DT::renderDataTable(topographie,
+                                           filter = 'top',
+                                           rownames = FALSE, server = TRUE,
+                                           options = list(pageLength = nrow(topographie)))
+ 
+ output$action <- DT::renderDataTable(action,
+                                      filter = 'top',
+                                      rownames = FALSE, server = TRUE,
+                                      options = list(pageLength = nrow(action)))
+ 
+ output$technique <- DT::renderDataTable(technique,
+                                         filter = 'top',
+                                         rownames = FALSE, server = TRUE,
+                                         options = list(pageLength = nrow(technique)))
+ 
 })
 
 

@@ -6,22 +6,24 @@ library(rmarkdown)
 
 shinyUI(
   fluidPage(
-    theme = shinytheme("cosmo"),
-    titlePanel("GHM, RGHM, GHS, libellés et regroupements"),
+    theme = shinytheme("lumen"),
+    navbarPage(title = "Oncle GHM",
     
-    tabsetPanel(
-      tabPanel("Version de classification", 
-               selectInput("an", label = h3("Sélectionner l'année :"), 
-                                         choices = list("2018" = 18, "2017" = 17,"2016" = 16, "2015 (v11g)" = 15), 
-                                         selected = 17))),
+    
+    tabPanel("Guide d'utilisation / Année",
+             column(8, 
+                    h2("Guide d'utilisation / Année"),
+                    includeMarkdown("README_app.md")),
+             column(4,
+                    selectInput("an", label = h3("Choisir l'année séquentielle"), 
+                                choices = list("2019" = 19,  "2018" = 18, "2017" = 17,"2016" = 16, "2015" = 15), 
+                                selected = 19))),
+    
     # h6("Cliquer", a("ici", href="http://164.1.196.52:3838"), "pour un retour à la page d'accueil de la plateforme"),
-    mainPanel(width = 12,
-    tabsetPanel(
+    
       # Guide ----
       
-      tabPanel("Guide d'utilisation",
-               includeMarkdown("README_app.md")),
-      
+
       tabPanel("GHM ?",
                textInput("GHM", "GHM :", "01C034"),
                h4('Libellé :'),
@@ -38,14 +40,19 @@ shinyUI(
                DT::dataTableOutput('tarifs')
                ),
       
-      tabPanel("RGP-GHM",
+    tabPanel('Regroupements',  
+    tabsetPanel(
+
+    tabPanel("RGP-GHM",br(),
                fluidRow(DT::dataTableOutput('dflib1'))),
       
-      tabPanel("RGP-RGHM",
-               fluidRow(DT::dataTableOutput('dflib2'))),
+      tabPanel("RGP-RGHM",br(),
+               fluidRow(DT::dataTableOutput('dflib2'))))),
       
-      tabPanel("GHS",
-               DT::dataTableOutput('dflib3')),
-      tabPanel("Suppléments",
-               DT::dataTableOutput('dflib4'))
-))))
+    tabPanel('Tarifs',
+    tabsetPanel(
+      tabPanel("GHS",br(),
+               fluidRow(DT::dataTableOutput('dflib3'))),
+      tabPanel("Suppléments",br(),
+               fluidRow(DT::dataTableOutput('dflib4')))))
+)))
