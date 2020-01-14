@@ -4,6 +4,7 @@ library(stringr)
 library(DT)
 #library(clipr)
 library(readr)
+library(esquisse)
 #library(rclipboard)
 library(zeroclipr)
 library(rmarkdown)
@@ -37,8 +38,18 @@ read_rds('sources/cim/cim_listes_18.Rds') -> cim_listes_18
 read_rds('sources/cim/cim_listes_19.Rds') -> cim_listes_19
 
 source("all_ghm.R")
+#source("all_guiliste.R")
+library(esquisse)
 
-shinyServer(function(input, output){
+lccam <- ccam %>% distinct(codes = substr(code,1,4)) %>% pull(codes)
+
+poss <-c("0 Pas de restriction",
+         "1 Interdit en DP et en DR, autorisé ailleurs",
+         "2 Interdit en DP et en DR, cause externe de morbidité", 
+         "3 interdit en DP, DR, DA", 
+         "4 Interdit en DP, autorisé ailleurs")
+
+shinyServer(function(input, output, session){
   
   
   output$value <- renderPrint({
@@ -385,6 +396,135 @@ shinyServer(function(input, output){
         select(-GHM, - `Libellé du GHS`))})
   output$tarifs <- DT::renderDataTable(datatable(t()
                                                  , rownames = F,  options = list(dom = 't', searchHighlight = TRUE)), server = F)
+  
+  
+  outVar <- reactive({
+    if (input$nomenclature == "CIM"){
+      #vars <- all.vars(parse(text = input$text))
+      vars <- lcim()[grepl(paste0("^(", paste0(input$text %>% stringr::str_split(', ') %>% unlist(), 
+                                             collapse = "|"), ")"), lcim())]
+    } else if (input$nomenclature == "CCAM"){
+      vars <- lccam[grepl(paste0("^(", paste0(input$text %>% stringr::str_split(', ') %>% unlist(), 
+                                              collapse = "|"), ")"), lccam)]
+    }
+    vars <- as.list(vars)
+    return(vars)
+  })
+  
+  output$var2 <- renderUI({
+    dragulaInput('dragula_input2',
+                 
+                 badge = TRUE,
+                 # choices = c('C00', 'C01'),
+                 choices = outVar(),
+                 targetsIds = 'target',
+                 height = 150,
+                 targetsLabels = 'Déposer',
+                 sourceLabel = 'Glisser', width = "100%")})
+  
+  
+  #output$result <- renderPrint(str(input$dragula_input))
+  
+  observeEvent(input$nomenclature, {
+    if (input$nomenclature == "CIM"){
+      shinyjs::enable('positions')
+    } else if (input$nomenclature == "CCAM"){
+      shinyjs::disable('positions')
+    } 
+  })
+  
+  cim <- reactive({get(paste0("cim_", input$an))})
+  lcim <- reactive({cim() %>% distinct(cats = substr(code,1,3)) %>% pull(cats)})
+  
+  
+  output$liste <- renderText({
+    
+    if (input$nomenclature == "CIM"){
+      if (!is.null(input$dragula_input2$target$target)){
+        d <- cim() %>% filter(substr(code,1,3) %in% (input$dragula_input2$target %>% unlist()),
+                               tr %in% input$positions) %>% 
+          distinct(code) %>% 
+          pull(code) %>% 
+          paste0(collapse = ", ")
+      } else {
+        d <- cim() %>% filter(substr(code,1,3) %in% (input$dragula_input2$source %>% unlist()),
+                               tr %in% input$positions) %>% 
+          distinct(code) %>% 
+          pull(code) %>% 
+          paste0(collapse = ", ")
+          
+      }
+    } else if (input$nomenclature == "CCAM"){
+      if (!is.null(input$dragula_input2$target$target)){
+      d <- ccam %>% filter(substr(code, 1,4) %in% (input$dragula_input2$target %>% unlist()), nchar(code) == '7') %>% 
+        distinct(code) %>% pull(code) %>% paste0(collapse = ", ")
+      } else {
+        d <- ccam %>% filter(substr(code, 1,4) %in% (input$dragula_input2$source %>% unlist()), nchar(code) == '7') %>% 
+          distinct(code) %>% pull(code) %>% paste0(collapse = ", ")
+        
+      }
+      
+    }
+  })
+  
+  observeEvent(input$nomenclature,{
+    if (input$nomenclature == "CIM"){
+      updateTextInput(session, inputId = 'text', value = 'C0, D1')
+    } else if (input$nomenclature == "CCAM"){
+      updateTextInput(session, 
+                      inputId = 'text', 
+                      value = 'NF|NE')
+    }
+  })
+  
+  output$sourceliste <- renderText({
+    paste0(unlist(input$source), collapse = ", ")
+  })
+  
+  diags1 <-  reactive({
+    if (input$nomenclature == "CIM"){
+      if (!is.null(input$dragula_input2$target$target)){
+        i <- cim() %>% filter(substr(code, 1,3) %in% (input$dragula_input2$target %>% unlist()),
+                               tr %in% input$positions) %>% 
+          distinct(code, tr, lib_long)
+      } else {
+        i <- cim() %>% filter(substr(code, 1,3) %in% (input$dragula_input2$source %>% unlist()),
+                               tr %in% input$positions) %>% 
+          distinct(code, tr, lib_long)
+        
+      }} else if (input$nomenclature == "CCAM"){
+        if (!is.null(input$dragula_input2$target$target)){
+          i <- ccam %>% filter(substr(code, 1,4) %in% (input$dragula_input2$target %>% unlist())) %>% 
+            distinct(code, libelle)  
+        } else {
+          i <- ccam %>% filter(substr(code, 1,4) %in% (input$dragula_input2$source %>% unlist())) %>% 
+            distinct(code, libelle)
+        }
+      }
+    i
+  })
+  
+  output$diags2 <- DT::renderDataTable(datatable(
+    diags1(), extensions = 'Buttons', options = list(
+      dom = 'Bfrtip', searchHighlight = TRUE, pageLength = min(nrow(diags1()), 100L),
+      buttons = c('copy', 'csv', 'excel')), rownames = F), server = F)
+  
+  observeEvent(input$nomenclature, {
+    if (input$nomenclature == "CIM") {
+      updateDragulaInput(
+        session = session, 
+        inputId = "dragula_input2", 
+        choices = outVar()
+      )
+    } else if (input$nomenclature == "CCAM") {
+      updateDragulaInput(
+        session = session, 
+        inputId = "dragula_input2", 
+        choices = outVar()
+      )
+    }
+  }, ignoreInit = TRUE)
+  
 })
 
 

@@ -3,9 +3,29 @@ library(dplyr)
 library(stringr)
 library(shinythemes)
 
+poss <-c("0 Pas de restriction",
+         "1 Interdit en DP et en DR, autorisé ailleurs",
+         "2 Interdit en DP et en DR, cause externe de morbidité", 
+         "3 interdit en DP, DR, DA", 
+         "4 Interdit en DP, autorisé ailleurs")
+
 shinyUI(
   fluidPage(
     theme = shinytheme("lumen"),
+    tags$style(HTML("
+      .label {
+      background-color: #e6e6e6;
+      color:black;
+      font-size:110%;
+      /*border-color: grey;
+      border-width:thin;
+      border-radius: .25em;
+      border-style: solid;
+      color: black;
+      
+      padding: .4em;*/
+      }
+    ")),
     navbarPage(title = "DiMonade",selected = "Oncle CCAM",
                tabPanel("Guide d'utilisation / Année",
                         column(8, 
@@ -155,6 +175,23 @@ shinyUI(
                                             fluidRow(DT::dataTableOutput('ghm_dflib3'))),
                                    tabPanel("Suppléments",br(),
                                             fluidRow(DT::dataTableOutput('ghm_dflib4'))))
-                                 ))))))
+                                 ))),
+               tabPanel('Fabrique  à liste',
+                        br(),
+                        shinyjs::useShinyjs(),
+                        selectInput(inputId = 'nomenclature', label = c('Nomenclature'), choices = c('CIM', 'CCAM')),
+                        textInput("text", "Filtrer sur les codes", 'C, D'),
+                        shinyWidgets::checkboxGroupButtons(inputId = "positions",
+                                                           label = "Positions des diagnostics",
+                                                           
+                                                           choiceNames = poss,
+                                                           choiceValues = as.character(0:4),
+                                                           selected = as.character(c(0,1,2,4))),
+                        uiOutput('variables'),
+                        tags$h5("Déplacer les codes pères pour filtrer la liste"),
+                        uiOutput('var2', width = "100%", height = 150),
+                        verbatimTextOutput('liste'),
+                        DT::dataTableOutput('diags2')
+               ))))
   
                
