@@ -9,6 +9,17 @@ library(esquisse)
 library(zeroclipr)
 library(rmarkdown)
 
+enrobeur <- function(a, robe = "\'", colonne = F, interstice = ", ", symetrique = F){
+  strReverse <- function(x) sapply(lapply(strsplit(x, NULL), rev), paste,
+                                   collapse="")
+  
+  b <- paste0(robe,a,ifelse(symetrique == F,robe, strReverse(robe)))
+  if (colonne == F){
+    return(paste0(b, collapse = interstice))
+  }
+  else { return(b)}
+  
+}
 read_rds('sources/ccam/ccam.Rds') -> ccam
 
 read_rds('sources/ccam/ccam_hierarchie.Rds') -> ccam_hierarchie
@@ -70,21 +81,26 @@ shinyServer(function(input, output, session){
                                                    searchHighlight = TRUE, 
                                                    search = list(regex = TRUE)),
                                     rownames = FALSE, server = TRUE)
+  #niveau_hiera_ccam
+  ccam_hiera_explore <- reactive({
+    get('ccam_hierarchie') %>% 
+      select(`Niveau hiérarchique` = niveau,
+             #`Code hiérarchie` = code,
+             `Strate CCAM` = strate,
+             `Libellé` = libelle,
+             `Chapitre` = libelle_niveau_1,
+             `Sous-chapitre` = libelle_niveau_2,
+             `Paragraphe` = libelle_niveau_3,
+             `Sous-paragraphe` = libelle_niveau_4) %>% 
+      mutate(`Niveau hiérarchique` = as.factor(case_when(
+        `Niveau hiérarchique` == 1 ~ '1 - Chapitre',
+        `Niveau hiérarchique` == 2 ~ '2 - Sous-chapitre',
+        `Niveau hiérarchique` == 3 ~ '3 - Paragraphe',
+        `Niveau hiérarchique` == 4 ~ '4 - Sous-paragraphe'))) %>% 
+      filter(`Niveau hiérarchique` %in% input$niveau_hiera_ccam)
+  })
   
-  output$ccam_df1 <- DT::renderDataTable(get('ccam_hierarchie') %>% 
-                                      select(`Niveau hiérarchique` = niveau,
-                                             #`Code hiérarchie` = code,
-                                             `Strate CCAM` = strate,
-                                             `Libellé` = libelle,
-                                             `Chapitre` = libelle_niveau_1,
-                                             `Sous-chapitre` = libelle_niveau_2,
-                                             `Paragraphe` = libelle_niveau_3,
-                                             `Sous-paragraphe` = libelle_niveau_4) %>% 
-                                      mutate(`Niveau hiérarchique` = as.factor(case_when(
-                                        `Niveau hiérarchique` == 1 ~ '1 - Chapitre',
-                                        `Niveau hiérarchique` == 2 ~ '2 - Sous-chapitre',
-                                        `Niveau hiérarchique` == 3 ~ '3 - Paragraphe',
-                                        `Niveau hiérarchique` == 4 ~ '4 - Sous-paragraphe'))),
+  output$ccam_df1 <- DT::renderDataTable(ccam_hiera_explore(),
                                     filter = 'top',
                                     options = list(searchHighlight = TRUE, pageLength = 20),
                                     rownames = FALSE, server = TRUE)
@@ -243,6 +259,40 @@ shinyServer(function(input, output, session){
                                    options = list(searchHighlight = TRUE, regex = TRUE, pageLength = 20),
                                    rownames = FALSE, server = TRUE)
   
+  
+  hiera <- reactive({
+    
+    if (input$regexp_cim == TRUE){
+      
+        tete <- get(paste0('cim_',input$an)) %>% 
+          distinct(chapitre = chapitre_regexp, lib_chapitre,
+                   bloc = bloc_regexp, lib_bloc,
+                   categorie, lib_categorie)
+    } else {
+        tete <- get(paste0('cim_',input$an)) %>% 
+          distinct(chapitre, lib_chapitre, 
+                   bloc, lib_bloc,
+                   categorie, lib_categorie)
+    }
+    
+    if (input$niveau_hiera == 'Catégorie'){
+      return(tete %>% select(categorie, lib_categorie, bloc, lib_bloc, everything()))
+    }
+    if (input$niveau_hiera == 'Bloc'){
+      return(tete %>% distinct(bloc, lib_bloc, chapitre, lib_chapitre))
+    }
+    if (input$niveau_hiera == 'Chapitre'){
+      return(tete %>% distinct(chapitre, lib_chapitre))
+    }
+    }
+  )
+
+  output$cim_hiera_df <- DT::renderDataTable(hiera(),
+                        filter = 'top',
+                        options = list(searchHighlight = TRUE, regex = TRUE, pageLength = 20),
+                        rownames = FALSE, server = TRUE)
+    
+  
   output$cim_liste <- DT::renderDataTable(distinct(select(get(paste0('cim_listes_',input$an)), `N° de la liste` = num_liste, 
                                                       `Nom de la liste` = e,
                                                       `Racines ghm` = rghm,
@@ -399,12 +449,15 @@ shinyServer(function(input, output, session){
   
   
   outVar <- reactive({
+    
+    if (input$text == ''){return('')}
+    
     if (input$nomenclature == "CIM"){
       #vars <- all.vars(parse(text = input$text))
-      vars <- lcim()[grepl(paste0("^(", paste0(input$text %>% stringr::str_split(', ') %>% unlist(), 
+      vars <- lcim()[grepl(paste0("^(", paste0(toupper(input$text) %>% stringr::str_split(', ') %>% unlist(), 
                                              collapse = "|"), ")"), lcim())]
     } else if (input$nomenclature == "CCAM"){
-      vars <- lccam[grepl(paste0("^(", paste0(input$text %>% stringr::str_split(', ') %>% unlist(), 
+      vars <- lccam[grepl(paste0("^(", paste0(toupper(input$text) %>% stringr::str_split(', ') %>% unlist(), 
                                               collapse = "|"), ")"), lccam)]
     }
     vars <- as.list(vars)
@@ -412,6 +465,7 @@ shinyServer(function(input, output, session){
   })
   
   output$var2 <- renderUI({
+    
     dragulaInput('dragula_input2',
                  
                  badge = TRUE,
@@ -427,9 +481,9 @@ shinyServer(function(input, output, session){
   
   observeEvent(input$nomenclature, {
     if (input$nomenclature == "CIM"){
-      shinyjs::enable('positions')
+      shinyjs::show('positions')
     } else if (input$nomenclature == "CCAM"){
-      shinyjs::disable('positions')
+      shinyjs::hide('positions')
     } 
   })
   
@@ -438,42 +492,83 @@ shinyServer(function(input, output, session){
   
   
   output$liste <- renderText({
-    
+    #if (input$text == ''){return(NULL)}
     if (input$nomenclature == "CIM"){
       if (!is.null(input$dragula_input2$target$target)){
         d <- cim() %>% filter(substr(code,1,3) %in% (input$dragula_input2$target %>% unlist()),
-                               tr %in% input$positions) %>% 
+                              tr %in% input$positions) %>% 
           distinct(code) %>% 
-          pull(code) %>% 
-          paste0(collapse = ", ")
+          pull(code)
       } else {
         d <- cim() %>% filter(substr(code,1,3) %in% (input$dragula_input2$source %>% unlist()),
-                               tr %in% input$positions) %>% 
+                              tr %in% input$positions) %>% 
           distinct(code) %>% 
-          pull(code) %>% 
-          paste0(collapse = ", ")
-          
-      }
-    } else if (input$nomenclature == "CCAM"){
-      if (!is.null(input$dragula_input2$target$target)){
-      d <- ccam %>% filter(substr(code, 1,4) %in% (input$dragula_input2$target %>% unlist()), nchar(code) == '7') %>% 
-        distinct(code) %>% pull(code) %>% paste0(collapse = ", ")
-      } else {
-        d <- ccam %>% filter(substr(code, 1,4) %in% (input$dragula_input2$source %>% unlist()), nchar(code) == '7') %>% 
-          distinct(code) %>% pull(code) %>% paste0(collapse = ", ")
+          pull(code)
         
       }
+
+      if (input$code_pere){
+        d <- substr(d,1,3) %>% unique()
+      }
       
+    } 
+    
+    if (input$nomenclature == "CCAM"){
+      if (!is.null(input$dragula_input2$target$target)){
+        d <- ccam %>% filter(substr(code, 1,4) %in% (input$dragula_input2$target %>% unlist())) %>% 
+          distinct(code = substr(code,1,7)) %>% pull(code)
+      } else {
+        d <- ccam %>% filter(substr(code, 1,4) %in% (input$dragula_input2$source %>% unlist())) %>% 
+          distinct(code = substr(code,1,7)) %>% pull(code)
+        
+      }
+
+      if (input$code_pere){
+        d <- substr(d, 1, 4) %>% unique()
+      }
+
+    }
+    if (input$format_liste == 'nu'){
+      return(d %>% paste0(collapse = input$sep_l))
+    } else
+      if (input$format_liste == 'simple quote'){
+        return(enrobeur(d, robe = "'", colonne = F, interstice = input$sep_l))
+      } else
+        if (input$format_liste == 'double quote'){
+          return(enrobeur(d, robe = "\"", colonne = F, interstice = input$sep_l))
+        } else
+          if (input$format_liste == 'pipe'){
+            return(enrobeur(d, robe = "", colonne = F, interstice = "|"))
+          } else
+            if (input$format_liste == 'SQL like%'){
+              return(paste0(input$sep_l, enrobeur(paste0(d, "%"), robe = "'", colonne = F, interstice = input$sep_l)))
+            }
+  })
+  #output$liste <- renderText(liste_texte())
+  observeEvent(input$format_liste,{
+    if (! input$format_liste %in% c("pipe", 'SQL like%')){
+      updateTextInput(session, inputId = 'sep_l', value = ", ")
+    }
+    if (input$format_liste == "pipe"){
+      updateTextInput(session, inputId = 'sep_l', value = '|')
+    } else if (input$format_liste == "SQL like%"){
+      updateTextInput(session, 
+                      inputId = 'sep_l', 
+                      value = ' or code like ')
     }
   })
   
   observeEvent(input$nomenclature,{
     if (input$nomenclature == "CIM"){
-      updateTextInput(session, inputId = 'text', value = 'C0, D1')
+      updateTextInput(session, inputId = 'text', value = 'D12, E6, e4', placeholder = 'C[0-9][0-7], E6, E4')
+      #updateNumericInput(session, inputId = 'nb_chara', value = 6, max = 6, min = 3)
+      shinyWidgets::updateSwitchInput(session, inputId = 'code_pere', onLabel = "Catégories", offLabel = "Codes CIM")
     } else if (input$nomenclature == "CCAM"){
       updateTextInput(session, 
                       inputId = 'text', 
-                      value = 'NF|NE')
+                      value = '', placeholder = 'N.KA, EB, ZZLP')
+      #updateNumericInput(session, inputId = 'nb_chara', value = 7, max = 7, min = 1)
+      shinyWidgets::updateSwitchInput(session, inputId = 'code_pere', onLabel = "Codes pères", offLabel = "Codes CCAM")
     }
   })
   
@@ -482,23 +577,24 @@ shinyServer(function(input, output, session){
   })
   
   diags1 <-  reactive({
+    if (input$text == ''){return(NULL)}
     if (input$nomenclature == "CIM"){
       if (!is.null(input$dragula_input2$target$target)){
         i <- cim() %>% filter(substr(code, 1,3) %in% (input$dragula_input2$target %>% unlist()),
                                tr %in% input$positions) %>% 
-          distinct(code, tr, lib_long)
+          distinct(code, tr, lib_long, bloc, lib_bloc, chapitre, lib_chapitre)
       } else {
         i <- cim() %>% filter(substr(code, 1,3) %in% (input$dragula_input2$source %>% unlist()),
                                tr %in% input$positions) %>% 
-          distinct(code, tr, lib_long)
+          distinct(code, tr, lib_long, bloc, lib_bloc, chapitre, lib_chapitre)
         
       }} else if (input$nomenclature == "CCAM"){
         if (!is.null(input$dragula_input2$target$target)){
           i <- ccam %>% filter(substr(code, 1,4) %in% (input$dragula_input2$target %>% unlist())) %>% 
-            distinct(code, libelle)  
+            distinct(code, libelle, strate)  
         } else {
           i <- ccam %>% filter(substr(code, 1,4) %in% (input$dragula_input2$source %>% unlist())) %>% 
-            distinct(code, libelle)
+            distinct(code, libelle, strate)
         }
       }
     i

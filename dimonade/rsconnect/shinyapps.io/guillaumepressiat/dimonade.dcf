@@ -5,6 +5,6 @@ account: guillaumepressiat
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1615998
-bundleId: 2726135
+bundleId: 2737587
 url: https://guillaumepressiat.shinyapps.io/dimonade/
-when: 1578946644.66256
+when: 1579362566.7856

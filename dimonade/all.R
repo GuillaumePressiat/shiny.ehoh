@@ -91,7 +91,12 @@
 #   con <- DBI::dbConnect(RSQLite::SQLite(), "~/Documents/R/PG/pg.sqlite")
 # 
 #   s <- as.character(2000 + an)
-#   a <- tbl(con, 'cim') %>% filter(time_i == local(s)) %>% collect()
+#   a <- tbl(con, 'cim_hierarchie_code') %>% filter(time_i == local(s)) %>% collect() %>% 
+#     mutate(bloc_regexp = paste0(substr(bloc,2,2), '[', substr(bloc,3,3), '-', substr(bloc,7,7), ']',
+#                                 '[', substr(bloc, 4,4), '-', substr(bloc,8,8), ']'),
+#            chapitre_regexp = paste0('[', substr(chapitre,2,2),'-',substr(chapitre,6,6),']',
+#                                     '[', substr(chapitre,3,3), '-', substr(chapitre,7,7), ']',
+#                                     '[', substr(chapitre, 4,4), '-', substr(chapitre,8,8), ']'))
 # 
 #   write_rds(a,paste0('sources/cim/cim_',an,'.Rds'))
 # 
@@ -119,6 +124,6 @@
 # prep_cim(17)
 # prep_cim(18)
 # prep_cim(19)
-
-
-
+# 
+# 
+# 

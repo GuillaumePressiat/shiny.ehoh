@@ -26,6 +26,7 @@ shinyUI(
       padding: .4em;*/
       }
     ")),
+    tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: #cccccc; border:white; color:black}")),
     navbarPage(title = "DiMonade",selected = "Oncle CCAM",
                tabPanel("Guide d'utilisation / Année",
                         column(8, 
@@ -43,6 +44,11 @@ shinyUI(
                                              tabsetPanel(selected = "CCAM",
                                                          tabPanel('Hiérarchie',
                                                                   br(),
+                                                                  shinyWidgets::checkboxGroupButtons(inputId = "niveau_hiera_ccam",
+                                                                                                     label = "Niveau hiérarchique",
+                                                                                                     choiceNames = c('1 - Chapitre', '2 - Sous-chapitre', '3 - Paragraphe', '4 - Sous-paragraphe'),
+                                                                                                     choiceValues = c('1 - Chapitre', '2 - Sous-chapitre', '3 - Paragraphe', '4 - Sous-paragraphe'),
+                                                                                                     selected = c('1 - Chapitre', '2 - Sous-chapitre', '3 - Paragraphe', '4 - Sous-paragraphe')), 
                                                                   DT::dataTableOutput('ccam_df1')),
                                                          tabPanel("CCAM",br(),
                                                                   DT::dataTableOutput('ccam_df2')),
@@ -106,8 +112,21 @@ shinyUI(
 
                                     )),
                tabPanel("Oncle CiM",
-                        tabsetPanel(selected = "CIM-10",
-                                    tabPanel("CIM-10",
+                        tabsetPanel(selected = "Hiérarchie",
+                                    tabPanel("Hiérarchie",
+                                             fluidRow(
+                                               br(),
+                                               
+                                               column(9,
+                                               shinyWidgets::prettyRadioButtons('niveau_hiera', 'Niveau hiérarchique', choices = c('Catégorie', 'Bloc', 'Chapitre'), selected = 'Bloc', 
+                                                                                shape = "round",animation = "jelly",plain = TRUE,bigger = TRUE,inline = TRUE,
+                                                                                  
+                                                                                fill = TRUE)),
+                                               column(3,
+                                               shinyWidgets::prettyCheckbox('regexp_cim', 'Aide expressions régulières', status = 'primary')),
+                                               column(12, 
+                                                      DT::dataTableOutput('cim_hiera_df')))),
+                                    tabPanel("CIM",
                                              fluidRow(
                                                
                                                column(12, 
@@ -179,18 +198,30 @@ shinyUI(
                tabPanel('Fabrique  à liste',
                         br(),
                         shinyjs::useShinyjs(),
-                        selectInput(inputId = 'nomenclature', label = c('Nomenclature'), choices = c('CIM', 'CCAM')),
-                        textInput("text", "Filtrer sur les codes", 'C, D'),
+                        fluidRow(
+                            column(3, textInput("text", "Filtrer sur les codes", width = '400px',
+                                                value = 'D12, E6, e4')),
+                          column(2, shinyWidgets::radioGroupButtons(inputId = 'nomenclature', label = c('Nomenclature'), choices = c('CIM', 'CCAM'), individual = TRUE))),
                         shinyWidgets::checkboxGroupButtons(inputId = "positions",
-                                                           label = "Positions des diagnostics",
-                                                           
+                                                           label = "Positions des diagnostics", 
                                                            choiceNames = poss,
                                                            choiceValues = as.character(0:4),
-                                                           selected = as.character(c(0,1,2,4))),
+                                                           selected = as.character(c(0,1,2,3,4))),
                         uiOutput('variables'),
                         tags$h5("Déplacer les codes pères pour filtrer la liste"),
                         uiOutput('var2', width = "100%", height = 150),
-                        verbatimTextOutput('liste'),
+                        
+                        fluidRow(
+                          column(2,
+                                 shinyWidgets::switchInput("code_pere", label = "Type liste", value = FALSE, onLabel = "Catégories", offLabel = "Codes CIM", size = "mini")),
+                          column(2),
+                          column(5, shinyWidgets::prettyRadioButtons('format_liste', label = 'Format', 
+                                                                     choices = c('nu', 'simple quote', 'double quote', 'pipe', 'SQL like%'), selected = 'nu', 
+                                                                     inline = TRUE, fill = TRUE, bigger = TRUE)), 
+                          column(1),
+                          column(2, textInput('sep_l', 'Séparateur', value = ', ', width = 150))), 
+    h6('Astuce : pour copier la liste triple clic + copier'),
+    verbatimTextOutput('liste'),
                         DT::dataTableOutput('diags2')
                ))))
   
