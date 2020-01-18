@@ -214,12 +214,12 @@ shinyUI(
                         fluidRow(
                           column(3,
                                  shinyWidgets::switchInput("code_pere", label = "Type liste", value = FALSE, onLabel = "Catégories", offLabel = "Codes CIM", size = "mini")),
-                          column(1),
-                          column(5, shinyWidgets::prettyRadioButtons('format_liste', label = 'Format', 
+                          column(6, shinyWidgets::prettyRadioButtons('format_liste', label = NULL, 
                                                                      choices = c('nu', 'simple quote', 'double quote', 'pipe', 'SQL like%'), selected = 'nu', 
                                                                      inline = TRUE, fill = TRUE, bigger = TRUE)), 
-                          column(1),
-                          column(2, textInput('sep_l', 'Séparateur', value = ', ', width = 150))), 
+                          column(2, textInput('sep_l', 'Séparateur', value = ', ', width = 150)),
+                          column(1, checkboxInput('wrapof', label = 'Wrap', value = FALSE),
+                          shinyjs::hidden(numericInput('wrapw', label = NULL, min = 30, max = 1e6, value = 90)))), 
     h6('Astuce : pour copier la liste triple clic + copier'),
     verbatimTextOutput('liste'),
                         DT::dataTableOutput('diags2')

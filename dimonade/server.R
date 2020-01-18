@@ -529,19 +529,19 @@ shinyServer(function(input, output, session){
 
     }
     if (input$format_liste == 'nu'){
-      return(d %>% paste0(collapse = input$sep_l))
+      return(stringr::str_wrap(d %>% paste0(collapse = input$sep_l), width = input$wrapw))
     } else
       if (input$format_liste == 'simple quote'){
-        return(enrobeur(d, robe = "'", colonne = F, interstice = input$sep_l))
+        return(stringr::str_wrap(enrobeur(d, robe = "'", colonne = F, interstice = input$sep_l), width = input$wrapw))
       } else
         if (input$format_liste == 'double quote'){
-          return(enrobeur(d, robe = "\"", colonne = F, interstice = input$sep_l))
+          return(stringr::str_wrap(enrobeur(d, robe = "\"", colonne = F, interstice = input$sep_l), width = input$wrapw))
         } else
           if (input$format_liste == 'pipe'){
             return(enrobeur(d, robe = "", colonne = F, interstice = "|"))
           } else
             if (input$format_liste == 'SQL like%'){
-              return(paste0(input$sep_l, enrobeur(paste0(d, "%"), robe = "'", colonne = F, interstice = input$sep_l)))
+              return(stringr::str_wrap(paste0(input$sep_l, enrobeur(paste0(d, "%"), robe = "'", colonne = F, interstice = input$sep_l)), width = input$wrapw))
             }
   })
   #output$liste <- renderText(liste_texte())
@@ -557,6 +557,18 @@ shinyServer(function(input, output, session){
                       value = ' or code like ')
     }
   })
+  
+
+  
+  observeEvent(input$wrapof,{
+    if (input$wrapof){
+      shinyjs::show('wrapw')
+      updateNumericInput(session, 'wrapw', value = 80)
+    } else {
+      updateNumericInput(session, 'wrapw', value = 1e6)  
+      shinyjs::hide('wrapw')
+      }
+    })
   
   observeEvent(input$nomenclature,{
     if (input$nomenclature == "CIM"){
