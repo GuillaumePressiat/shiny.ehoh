@@ -200,7 +200,7 @@ shinyUI(
                         shinyjs::useShinyjs(),
                         fluidRow(
                             column(3, textInput("text", "Filtrer sur les codes", width = '400px',
-                                                value = 'D12, E6, e4')),
+                                                placeholder = 'H[6-9][0-5], e4')),
                           column(2, shinyWidgets::radioGroupButtons(inputId = 'nomenclature', label = c('Nomenclature'), choices = c('CIM', 'CCAM'), individual = TRUE))),
                         shinyWidgets::checkboxGroupButtons(inputId = "positions",
                                                            label = "Positions des diagnostics", 
@@ -212,9 +212,9 @@ shinyUI(
                         uiOutput('var2', width = "100%", height = 150),
                         
                         fluidRow(
-                          column(2,
+                          column(3,
                                  shinyWidgets::switchInput("code_pere", label = "Type liste", value = FALSE, onLabel = "Catégories", offLabel = "Codes CIM", size = "mini")),
-                          column(2),
+                          column(1),
                           column(5, shinyWidgets::prettyRadioButtons('format_liste', label = 'Format', 
                                                                      choices = c('nu', 'simple quote', 'double quote', 'pipe', 'SQL like%'), selected = 'nu', 
                                                                      inline = TRUE, fill = TRUE, bigger = TRUE)), 

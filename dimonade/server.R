@@ -560,7 +560,7 @@ shinyServer(function(input, output, session){
   
   observeEvent(input$nomenclature,{
     if (input$nomenclature == "CIM"){
-      updateTextInput(session, inputId = 'text', value = 'D12, E6, e4', placeholder = 'C[0-9][0-7], E6, E4')
+      updateTextInput(session, inputId = 'text', placeholder = 'H[6-9][0-5], e4')
       #updateNumericInput(session, inputId = 'nb_chara', value = 6, max = 6, min = 3)
       shinyWidgets::updateSwitchInput(session, inputId = 'code_pere', onLabel = "Catégories", offLabel = "Codes CIM")
     } else if (input$nomenclature == "CCAM"){
