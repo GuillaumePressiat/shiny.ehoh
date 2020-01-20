@@ -200,7 +200,7 @@ shinyUI(
                         shinyjs::useShinyjs(),
                         fluidRow(
                             column(3, textInput("text", "Filtrer sur les codes", width = '400px',
-                                                placeholder = 'H[6-9][0-5], e4')),
+                                                placeholder = 'H[6-9], e4')),
                           column(2, shinyWidgets::radioGroupButtons(inputId = 'nomenclature', label = c('Nomenclature'), choices = c('CIM', 'CCAM'), individual = TRUE))),
                         shinyWidgets::checkboxGroupButtons(inputId = "positions",
                                                            label = "Positions des diagnostics", 

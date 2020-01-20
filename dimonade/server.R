@@ -263,25 +263,27 @@ shinyServer(function(input, output, session){
   hiera <- reactive({
     
     if (input$regexp_cim == TRUE){
-      
-        tete <- get(paste0('cim_',input$an)) %>% 
-          distinct(chapitre = chapitre_regexp, lib_chapitre,
-                   bloc = bloc_regexp, lib_bloc,
+
+        tete <- get(paste0('cim_',input$an)) %>%
+          distinct(chapitre, chapitre_regexp, lib_chapitre,
+                   bloc, bloc_regexp, lib_bloc,
                    categorie, lib_categorie)
     } else {
         tete <- get(paste0('cim_',input$an)) %>% 
           distinct(chapitre, lib_chapitre, 
                    bloc, lib_bloc,
                    categorie, lib_categorie)
-    }
+     }
     
     if (input$niveau_hiera == 'Catégorie'){
       return(tete %>% select(categorie, lib_categorie, bloc, lib_bloc, everything()))
     }
     if (input$niveau_hiera == 'Bloc'){
+      if (input$regexp_cim){return(tete %>% distinct(bloc, lib_bloc, chapitre, lib_chapitre, bloc_regexp))}
       return(tete %>% distinct(bloc, lib_bloc, chapitre, lib_chapitre))
     }
     if (input$niveau_hiera == 'Chapitre'){
+      if (input$regexp_cim){return(tete %>% distinct(chapitre, lib_chapitre, chapitre_regexp))}
       return(tete %>% distinct(chapitre, lib_chapitre))
     }
     }
@@ -289,7 +291,7 @@ shinyServer(function(input, output, session){
 
   output$cim_hiera_df <- DT::renderDataTable(hiera(),
                         filter = 'top',
-                        options = list(searchHighlight = TRUE, regex = TRUE, pageLength = 20),
+                        options = list(searchHighlight = TRUE, regex = TRUE, pageLength = 25),
                         rownames = FALSE, server = TRUE)
     
   
@@ -572,7 +574,7 @@ shinyServer(function(input, output, session){
   
   observeEvent(input$nomenclature,{
     if (input$nomenclature == "CIM"){
-      updateTextInput(session, inputId = 'text', placeholder = 'H[6-9][0-5], e4')
+      updateTextInput(session, inputId = 'text', placeholder = 'H[6-9], e4')
       #updateNumericInput(session, inputId = 'nb_chara', value = 6, max = 6, min = 3)
       shinyWidgets::updateSwitchInput(session, inputId = 'code_pere', onLabel = "Catégories", offLabel = "Codes CIM")
     } else if (input$nomenclature == "CCAM"){

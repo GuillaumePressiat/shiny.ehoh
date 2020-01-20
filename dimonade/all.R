@@ -1,4 +1,61 @@
-# an="19"
+# # an="19"
+# x <- "[A15-A19]"
+# x <- "[A00-B99]"
+# x <- "[B25-B34]"
+# regpex_cim <- function(x){
+#   liste_lettres <- list('', '')
+#   liste_chiffres <- list(0,0,0,0)
+#   lettres  <- stringr::str_extract_all(x, '[A-Z]') %>% unlist()
+#   chiffres <- stringr::str_extract_all(x, '[0-9]{2}') %>% unlist() %>%
+#     stringr::str_extract_all('[0-9]') %>% purrr::map(as.integer)
+# 
+#   lettreschiffres <- stringr::str_extract_all(x, '[A-Z][0-9]{1}') %>% unlist()
+# 
+#   if (length(unique(lettreschiffres)) == 1){
+#     resu <- paste0(unique(lettreschiffres), '[', chiffres[[1]][2], '-',chiffres[[2]][2], ']')
+#     return(resu)
+#   }
+#   if (length(unique(lettres)) == 1){
+#     liste_lettres  <- list(lettres[[1]][1],lettres[[1]][1])
+#     liste_chiffres <- list(chiffres[[1]][1], max(0, chiffres[[2]][1] - 1),
+#                            chiffres[[1]][2], chiffres[[2]][2])
+# 
+#     if (identical(chiffres[2] %>% unlist, c(9L,9L)) & identical(chiffres[1] %>% unlist, c(0L,0L))){
+#       resu <- paste0(liste_lettres[[1]], '[0-9][0-9]')
+#       return(resu)
+#     } else if (length(unique(lettreschiffres))> 1){
+#       resu <- paste0(liste_lettres[[1]], '[', chiffres[[1]][1], '-', max(0, chiffres[[2]][1] - 1), '][',
+#                      chiffres[[1]][2], '-9]',
+#                      '|', liste_lettres[[1]], chiffres[[2]][1], '[0-', chiffres[[2]][2], ']')
+#       return(resu)
+#     } else {
+#       resu <- paste0(liste_lettres[[1]], '[', chiffres[[1]][1], '-', max(0, chiffres[[2]][1] - 1), '][0-9]',
+#                      '|', liste_lettres[[1]], chiffres[[2]][1], '[0-', chiffres[[2]][2], ']')
+# 
+# 
+#     return(resu)
+#     }
+#   }
+# 
+#   if (length(unique(lettres)) > 1){
+#     liste_lettres  <- list(lettres[[1]][1],lettres[[2]][1])
+#     liste_chiffres <- list(chiffres[[1]][1], max(0, chiffres[[2]][1] - 1),
+#                            chiffres[[1]][2], chiffres[[2]][2])
+#     if (identical(chiffres[2] %>% unlist, c(9L,9L)) & identical(chiffres[1] %>% unlist, c(0L,0L))){
+#       resu <- paste0('[', liste_lettres[[1]], liste_lettres[[2]], ']', '[0-9][0-9]')
+#       return(resu)
+#     }
+#     else{
+# 
+# 
+#     resu <- paste0(liste_lettres[[1]], '[', chiffres[[1]][1], '-', 9, '][0-9]',
+#                    '|', liste_lettres[[2]], '[0-', chiffres[[2]][1], '][0-', chiffres[[2]][2], ']')
+#   return(resu)
+#     }
+#   }
+# 
+# }
+# 
 # 
 # 
 # # setup
@@ -76,10 +133,10 @@
 # prep_ccam(18)
 # prep_ccam(19)
 # 
-# 
-# 
-# 
-# # setup
+# #
+# #
+# #
+# # # setup
 # prep_cim <- function(an) {
 # 
 # 
@@ -91,13 +148,36 @@
 #   con <- DBI::dbConnect(RSQLite::SQLite(), "~/Documents/R/PG/pg.sqlite")
 # 
 #   s <- as.character(2000 + an)
-#   a <- tbl(con, 'cim_hierarchie_code') %>% filter(time_i == local(s)) %>% collect() %>% 
-#     mutate(bloc_regexp = paste0(substr(bloc,2,2), '[', substr(bloc,3,3), '-', substr(bloc,7,7), ']',
-#                                 '[', substr(bloc, 4,4), '-', substr(bloc,8,8), ']'),
-#            chapitre_regexp = paste0('[', substr(chapitre,2,2),'-',substr(chapitre,6,6),']',
-#                                     '[', substr(chapitre,3,3), '-', substr(chapitre,7,7), ']',
-#                                     '[', substr(chapitre, 4,4), '-', substr(chapitre,8,8), ']'))
-# 
+#   a <- tbl(con, 'cim_hierarchie_code') %>% filter(time_i == local(s)) %>% collect()
+#   chaps <- distinct(a, chapitre) %>%
+#     mutate(chapitre_regexp = chapitre %>% purrr::map_chr(regpex_cim)) %>% 
+#     mutate(chapitre_regexp = stringr::str_replace(chapitre_regexp, '\\[0-0\\]', '0') %>% 
+#            stringr::str_replace('\\[1-1\\]', '1') %>% 
+#            stringr::str_replace('\\[2-2\\]', '2') %>% 
+#            stringr::str_replace('\\[3-3\\]', '3') %>% 
+#            stringr::str_replace('\\[4-4\\]', '4') %>% 
+#            stringr::str_replace('\\[5-5\\]', '5') %>% 
+#            stringr::str_replace('\\[6-6\\]', '6') %>% 
+#            stringr::str_replace('\\[7-7\\]', '7') %>% 
+#            stringr::str_replace('\\[8-8\\]', '8') %>% 
+#            stringr::str_replace('\\[9-9\\]', '9') %>% 
+#              stringr::str_replace('\\[0-9\\]\\[0-9\\]', '\\[0-9\\]\\{2\\}'))
+#   
+#   blocs <- distinct(a, bloc) %>%
+#     mutate(bloc_regexp = bloc %>% purrr::map_chr(regpex_cim)) %>% 
+#     mutate(bloc_regexp = stringr::str_replace(bloc_regexp, '\\[0-0\\]', '0') %>% 
+#              stringr::str_replace('\\[1-1\\]', '1') %>% 
+#              stringr::str_replace('\\[2-2\\]', '2') %>% 
+#              stringr::str_replace('\\[3-3\\]', '3') %>% 
+#              stringr::str_replace('\\[4-4\\]', '4') %>% 
+#              stringr::str_replace('\\[5-5\\]', '5') %>% 
+#              stringr::str_replace('\\[6-6\\]', '6') %>% 
+#              stringr::str_replace('\\[7-7\\]', '7') %>% 
+#              stringr::str_replace('\\[8-8\\]', '8') %>% 
+#              stringr::str_replace('\\[9-9\\]', '9') %>% 
+#     stringr::str_replace('\\[0-9\\]\\[0-9\\]', '\\[0-9\\]\\{2\\}'))
+#   
+#   a <- a %>% left_join(chaps) %>% left_join(blocs)
 #   write_rds(a,paste0('sources/cim/cim_',an,'.Rds'))
 # 
 # 
