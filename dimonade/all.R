@@ -150,33 +150,33 @@
 #   s <- as.character(2000 + an)
 #   a <- tbl(con, 'cim_hierarchie_code') %>% filter(time_i == local(s)) %>% collect()
 #   chaps <- distinct(a, chapitre) %>%
-#     mutate(chapitre_regexp = chapitre %>% purrr::map_chr(regpex_cim)) %>% 
-#     mutate(chapitre_regexp = stringr::str_replace(chapitre_regexp, '\\[0-0\\]', '0') %>% 
-#            stringr::str_replace('\\[1-1\\]', '1') %>% 
-#            stringr::str_replace('\\[2-2\\]', '2') %>% 
-#            stringr::str_replace('\\[3-3\\]', '3') %>% 
-#            stringr::str_replace('\\[4-4\\]', '4') %>% 
-#            stringr::str_replace('\\[5-5\\]', '5') %>% 
-#            stringr::str_replace('\\[6-6\\]', '6') %>% 
-#            stringr::str_replace('\\[7-7\\]', '7') %>% 
-#            stringr::str_replace('\\[8-8\\]', '8') %>% 
-#            stringr::str_replace('\\[9-9\\]', '9') %>% 
+#     mutate(chapitre_regexp = chapitre %>% purrr::map_chr(regpex_cim)) %>%
+#     mutate(chapitre_regexp = stringr::str_replace(chapitre_regexp, '\\[0-0\\]', '0') %>%
+#            stringr::str_replace('\\[1-1\\]', '1') %>%
+#            stringr::str_replace('\\[2-2\\]', '2') %>%
+#            stringr::str_replace('\\[3-3\\]', '3') %>%
+#            stringr::str_replace('\\[4-4\\]', '4') %>%
+#            stringr::str_replace('\\[5-5\\]', '5') %>%
+#            stringr::str_replace('\\[6-6\\]', '6') %>%
+#            stringr::str_replace('\\[7-7\\]', '7') %>%
+#            stringr::str_replace('\\[8-8\\]', '8') %>%
+#            stringr::str_replace('\\[9-9\\]', '9') %>%
 #              stringr::str_replace('\\[0-9\\]\\[0-9\\]', '\\[0-9\\]\\{2\\}'))
-#   
+# 
 #   blocs <- distinct(a, bloc) %>%
-#     mutate(bloc_regexp = bloc %>% purrr::map_chr(regpex_cim)) %>% 
-#     mutate(bloc_regexp = stringr::str_replace(bloc_regexp, '\\[0-0\\]', '0') %>% 
-#              stringr::str_replace('\\[1-1\\]', '1') %>% 
-#              stringr::str_replace('\\[2-2\\]', '2') %>% 
-#              stringr::str_replace('\\[3-3\\]', '3') %>% 
-#              stringr::str_replace('\\[4-4\\]', '4') %>% 
-#              stringr::str_replace('\\[5-5\\]', '5') %>% 
-#              stringr::str_replace('\\[6-6\\]', '6') %>% 
-#              stringr::str_replace('\\[7-7\\]', '7') %>% 
-#              stringr::str_replace('\\[8-8\\]', '8') %>% 
-#              stringr::str_replace('\\[9-9\\]', '9') %>% 
+#     mutate(bloc_regexp = bloc %>% purrr::map_chr(regpex_cim)) %>%
+#     mutate(bloc_regexp = stringr::str_replace(bloc_regexp, '\\[0-0\\]', '0') %>%
+#              stringr::str_replace('\\[1-1\\]', '1') %>%
+#              stringr::str_replace('\\[2-2\\]', '2') %>%
+#              stringr::str_replace('\\[3-3\\]', '3') %>%
+#              stringr::str_replace('\\[4-4\\]', '4') %>%
+#              stringr::str_replace('\\[5-5\\]', '5') %>%
+#              stringr::str_replace('\\[6-6\\]', '6') %>%
+#              stringr::str_replace('\\[7-7\\]', '7') %>%
+#              stringr::str_replace('\\[8-8\\]', '8') %>%
+#              stringr::str_replace('\\[9-9\\]', '9') %>%
 #     stringr::str_replace('\\[0-9\\]\\[0-9\\]', '\\[0-9\\]\\{2\\}'))
-#   
+# 
 #   a <- a %>% left_join(chaps) %>% left_join(blocs)
 #   write_rds(a,paste0('sources/cim/cim_',an,'.Rds'))
 # 
@@ -204,6 +204,6 @@
 # prep_cim(17)
 # prep_cim(18)
 # prep_cim(19)
-# 
-# 
-# 
+
+
+
