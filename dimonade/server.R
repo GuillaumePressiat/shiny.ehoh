@@ -26,6 +26,7 @@ read_rds('sources/ccam/ccam_hierarchie.Rds') -> ccam_hierarchie
 
 read_rds('sources/ccam/ccam_notes.Rds') -> ccam_notes
 
+read_rds('sources/ccam/ccam_listes_20.Rds') -> ccam_listes_20
 read_rds('sources/ccam/ccam_listes_19.Rds') -> ccam_listes_19
 read_rds('sources/ccam/ccam_listes_18.Rds') -> ccam_listes_18
 read_rds('sources/ccam/ccam_listes_17.Rds') -> ccam_listes_17
@@ -41,12 +42,14 @@ read_rds('sources/cim/cim_16.Rds') -> cim_16
 read_rds('sources/cim/cim_17.Rds') -> cim_17
 read_rds('sources/cim/cim_18.Rds') -> cim_18
 read_rds('sources/cim/cim_19.Rds') -> cim_19
+read_rds('sources/cim/cim_20.Rds') -> cim_20
 
 read_rds('sources/cim/cim_listes_15.Rds') -> cim_listes_15
 read_rds('sources/cim/cim_listes_16.Rds') -> cim_listes_16
 read_rds('sources/cim/cim_listes_17.Rds') -> cim_listes_17
 read_rds('sources/cim/cim_listes_18.Rds') -> cim_listes_18
 read_rds('sources/cim/cim_listes_19.Rds') -> cim_listes_19
+read_rds('sources/cim/cim_listes_20.Rds') -> cim_listes_20
 
 source("all_ghm.R")
 #source("all_guiliste.R")
