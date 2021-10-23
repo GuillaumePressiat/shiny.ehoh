@@ -34,8 +34,8 @@ shinyUI(
                                includeMarkdown("README_app.md")),
                         column(4,
                                selectInput("an", label = h3("Choisir l'année séquentielle"), 
-                                           choices = list("2020" = 20, "2019" = 19,  "2018" = 18, "2017" = 17,"2016" = 16, "2015" = 15), 
-                                           selected = 20))),
+                                           choices = list("2021" = 21, "2020" = 20, "2019" = 19), #,  "2018" = 18, "2017" = 17,"2016" = 16, "2015" = 15
+                                           selected = 21))),
                
                tabPanel("Oncle CCAM",
                         tabsetPanel(selected = "CCAM",
